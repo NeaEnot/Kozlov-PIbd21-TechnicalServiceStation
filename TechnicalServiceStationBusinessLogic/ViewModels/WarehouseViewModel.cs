@@ -10,6 +10,6 @@ namespace TechnicalServiceStationBusinessLogic.ViewModels
         [DisplayName("Название склада")]
         public string WarehouseName { get; set; }
 
-        public Dictionary<int, (string, int)> AutopartsInWarehouse { get; set; }
+        public Dictionary<int, (string, int, int)> WarehouseAutoparts { get; set; }
     }
 }

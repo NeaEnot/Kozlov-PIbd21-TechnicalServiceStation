@@ -84,7 +84,7 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
                             }
                         )?[0];
 
-                    foreach (var autoparts in service.Autoparts)
+                    foreach (var autoparts in service.ServiceAutoparts)
                     {
                         var record = new ReportOrderAutopartsViewModel
                         {

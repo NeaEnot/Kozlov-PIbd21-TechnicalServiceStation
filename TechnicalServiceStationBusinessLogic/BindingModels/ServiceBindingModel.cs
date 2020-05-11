@@ -10,6 +10,6 @@ namespace TechnicalServiceStationBusinessLogic.BindingModels
 
         public int Price { get; set; }
 
-        public Dictionary<int, (string, int)> Autoparts { get; set; }
+        public Dictionary<int, (string, int)> ServiceAutoparts { get; set; }
     }
 }

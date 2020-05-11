@@ -8,6 +8,6 @@
 
         public int ServiceId { get; set; }
 
-        public int AutopartTypeId { get; set; }
+        public int AutopartsId { get; set; }
     }
 }

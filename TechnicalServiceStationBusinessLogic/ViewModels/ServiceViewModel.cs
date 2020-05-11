@@ -13,6 +13,6 @@ namespace TechnicalServiceStationBusinessLogic.ViewModels
         [DisplayName("Цена")]
         public int Price { get; set; }
 
-        public Dictionary<int, (string, int, int)> Autoparts { get; set; }
+        public Dictionary<int, (string, int, int)> ServiceAutoparts { get; set; }
     }
 }
