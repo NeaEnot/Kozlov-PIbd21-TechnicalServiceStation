@@ -1,13 +1,24 @@
-﻿namespace TechnicalServiceStationBusinessLogic.ViewModels
+﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
+using TechnicalServiceStationBusinessLogic.Attributes;
+using TechnicalServiceStationBusinessLogic.Enums;
+
+namespace TechnicalServiceStationBusinessLogic.ViewModels
 {
-    public class UserViewModel
+    public class UserViewModel : ViewModel
     {
-        public int Id { get; set; }
-
-        public string Login { get; set; }
-
+        [Column(title: "Email", gridViewAutoSize: GridViewAutoSize.Fill)]
+        [DataMember]
         public string Email { get; set; }
 
+        [DataMember]
         public string Password { get; set; }
+
+        public override List<string> Properties()
+            => new List<string>
+            {
+                "Id",
+                "Email"
+            };
     }
 }

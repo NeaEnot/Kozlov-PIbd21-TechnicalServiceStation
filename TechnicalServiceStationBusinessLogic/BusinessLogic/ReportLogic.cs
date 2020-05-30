@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
 using TechnicalServiceStationBusinessLogic.BindingModels;
 using TechnicalServiceStationBusinessLogic.HelperModels;
@@ -13,12 +15,14 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
         private readonly IAutopartsLogic autopartsLogic;
         private readonly IServiceLogic serviceLogic;
         private readonly IOrderLogic orderLogic;
+        private readonly IUserLogic userLogic;
 
-        public ReportLogic(IServiceLogic serviceLogic, IAutopartsLogic autopartTypeLogic, IOrderLogic orderLogic)
+        public ReportLogic(IServiceLogic serviceLogic, IAutopartsLogic autopartTypeLogic, IOrderLogic orderLogic, IUserLogic userLogic)
         {
             this.serviceLogic = serviceLogic;
             this.autopartsLogic = autopartTypeLogic;
             this.orderLogic = orderLogic;
+            this.userLogic = userLogic;
         }
 
         public Dictionary<int, List<ReportServiceViewModel>> GetServices(ReportBindingModel model)
@@ -102,34 +106,82 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
             return list;
         }
 
-        public void SaveServicesToWordFile(ReportBindingModel model)
+        public void SendServicesWordFile(UserBindingModel userModel, ReportBindingModel model)
         {
+            Random rnd = new Random();
+            string fileName = ConfigurationManager.AppSettings["TempFilesPath"] + rnd.Next().ToString() + ".docx";
+
             SaveToWord.CreateDoc(new WordInfo
             {
                 FileName = model.FileName,
                 Title = "Список работ",
                 Orders = GetServices(model)
             });
+
+            UserViewModel user = userLogic.Read(userModel)?[0];
+
+            MailLogic.MailSendAsync(
+                new MailSendInfo
+                {
+                    MailAddress = user.Email,
+                    Subject = "Список Работ",
+                    Text = "Отчёт в прикреплённом файле",
+                    Attachment = fileName
+                });
+
+            File.Delete(fileName);
         }
 
-        public void SaveServicesToExcelFile(ReportBindingModel model)
+        public void SendServicesExcelFile(UserBindingModel userModel, ReportBindingModel model)
         {
+            Random rnd = new Random();
+            string fileName = ConfigurationManager.AppSettings["TempFilesPath"] + rnd.Next().ToString() + ".xlsx";
+
             SaveToExcel.CreateDoc(new ExcelInfo
             {
-                FileName = model.FileName,
+                FileName = fileName,
                 Title = "Список работ",
                 Orders = GetServices(model)
             });
+
+            UserViewModel user = userLogic.Read(userModel)?[0];
+
+            MailLogic.MailSendAsync(
+                new MailSendInfo
+                {
+                    MailAddress = user.Email,
+                    Subject = "Список работ",
+                    Text = "Отчёт в прикреплённом файле",
+                    Attachment = fileName
+                });
+
+            File.Delete(fileName);
         }
 
-        public void SaveAutopartssToPdfFile(ReportBindingModel model)
+        public void SendAutopartsPdfFile(UserBindingModel userModel, ReportBindingModel model)
         {
+            Random rnd = new Random();
+            string fileName = ConfigurationManager.AppSettings["TempFilesPath"] + rnd.Next().ToString() + ".pdf";
+
             SaveToPdf.CreateDoc(new PdfInfo
             {
-                FileName = model.FileName,
+                FileName = fileName,
                 Title = "Список заказов с расшифровкой по запчастям",
                 OrderAutoparts = GetOrderAutoparts(model)
             });
+
+            UserViewModel user = userLogic.Read(userModel)?[0];
+
+            MailLogic.MailSendAsync(
+                new MailSendInfo
+                {
+                    MailAddress = user.Email,
+                    Subject = "Список заказов с расшифровкой по запчастям",
+                    Text = "Отчёт в прикреплённом файле",
+                    Attachment = fileName
+                });
+
+            File.Delete(fileName);
         }
     }
 }

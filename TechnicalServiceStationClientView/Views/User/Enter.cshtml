@@ -1,0 +1,36 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Авторизация</title>
+</head>
+<body>
+    <br />
+    <br />
+    <br />
+    <br />
+    <div align="center">
+        <form method="get" action="/User/LogIn">
+            <p><font color="#ff0000">@ViewData["errMessage"]</font></p>
+            <br />
+            <br />
+            <input id="Email" name="Email" type="text" placeholder="Почта" />
+            <br />
+            <br />
+            <input id="Password" name="Password" type="password" placeholder="Пароль" />
+            <br />
+            <br />
+            <input id="Submit" type="submit" value="Вход" />
+            <br />
+            <br />
+            <a href="/User/UserInfo">Зарегистрироваться</a>
+        </form>
+    </div>
+</body>
+</html>
