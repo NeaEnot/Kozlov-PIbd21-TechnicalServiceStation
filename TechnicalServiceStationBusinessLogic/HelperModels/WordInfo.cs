@@ -9,6 +9,6 @@ namespace TechnicalServiceStationBusinessLogic.HelperModels
 
         public string Title { get; set; }
 
-        public Dictionary<int, List<ReportServiceViewModel>> Orders { get; set; }
+        public List<ReportServiceViewModel> Report { get; set; }
     }
 }

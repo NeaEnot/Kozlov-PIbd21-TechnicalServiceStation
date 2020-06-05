@@ -3,8 +3,6 @@ using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Office2013.Excel;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using TechnicalServiceStationBusinessLogic.HelperModels;
 
@@ -68,7 +66,7 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
 
                 uint rowIndex = 2;
 
-                foreach (var order in info.Orders)
+                foreach (var order in info.Report)
                 {
                     int sum = 0;
 
@@ -78,13 +76,13 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
                         ShareStringPart = shareStringPart,
                         ColumnName = "A",
                         RowIndex = rowIndex,
-                        Text = order.Value[0].OrderCreateDate.ToString("dd.MM.yyyy"),
+                        Text = order.OrderId.ToString(),
                         StyleIndex = 0U
                     });
 
                     rowIndex++;
 
-                    foreach (var service in order.Value)
+                    foreach (var service in order.Services)
                     {
                         InsertCellInWorksheet(new ExcelCellParameters
                         {
@@ -92,7 +90,7 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
                             ShareStringPart = shareStringPart,
                             ColumnName = "B",
                             RowIndex = rowIndex,
-                            Text = service.ServiceName,
+                            Text = service.Item1,
                             StyleIndex = 1U
                         });
 
@@ -102,11 +100,11 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
                             ShareStringPart = shareStringPart,
                             ColumnName = "C",
                             RowIndex = rowIndex,
-                            Text = service.Price.ToString(),
+                            Text = service.Item2.ToString(),
                             StyleIndex = 1U
                         });
 
-                        sum += service.Price;
+                        sum += service.Item2;
 
                         rowIndex++;
                     }

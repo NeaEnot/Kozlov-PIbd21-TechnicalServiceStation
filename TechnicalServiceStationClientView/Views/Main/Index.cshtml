@@ -1,0 +1,71 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Главная</title>
+</head>
+<body>
+    <br />
+    <br />
+    <br />
+    <br />
+
+    <p align="right"><a href="/User/LogOut">Выйти</a></p>
+
+    <br />
+    <br />
+    <br />
+    <br />
+
+    <div align="center">
+        <form method="get" action="/Main/Orders">
+            <select multiple="multiple" name="orders" size="20">
+                @foreach (var order in ViewBag.orders)
+                {
+                    <option value="@order.Id">
+                        @order.Id.ToString() : @order.CreateDate.ToString("dd.MM.yyyy") - @(order.DeliveryDate != null ? order.DeliveryDate.ToString("dd.MM.yyyy") : "...") (@order.Status)
+                    </option>
+                }
+            </select>
+
+            <br />
+            <br />
+
+            <input type="submit" name="actionOption" value="Зарезервировать детали" />
+
+            <br />
+            <br />
+            <br />
+
+            <input type="radio" name="format" value="docx" checked="checked" /> docx
+            &nbsp&nbsp&nbsp
+            <input type="radio" name="format" value="xmlx" /> xmlx
+
+            <br />
+
+            <input type="submit" name="actionOption" value="Отправить отчёт о работах на почту" />
+        </form>
+    </div>
+
+    <br />
+    <br />
+
+    <p align="center"><font color="#ff0000">@ViewData["errMessage"]</font></p>
+
+    <br />
+    <br />
+
+    <p align="center">
+        <a href="/Main/NewOrder">Новый заказ</a>
+        &nbsp&nbsp&nbsp&nbsp&nbsp
+        <a href="/Main/Report?reportList=null">Отчёт</a>
+    </p>
+
+</body>
+</html>

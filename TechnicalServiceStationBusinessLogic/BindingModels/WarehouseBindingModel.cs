@@ -8,6 +8,6 @@ namespace TechnicalServiceStationBusinessLogic.BindingModels
 
         public string Name { get; set; }
 
-        public Dictionary<int, (string, int)> AutopartsInWarehouse { get; set; }
+        public Dictionary<int, (string, int, int)> WarehouseAutoparts { get; set; }
     }
 }

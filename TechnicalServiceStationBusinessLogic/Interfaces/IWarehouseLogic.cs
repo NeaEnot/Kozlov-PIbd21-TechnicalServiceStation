@@ -11,5 +11,9 @@ namespace TechnicalServiceStationBusinessLogic.Interfaces
         void CreateOrUpdate(WarehouseBindingModel model);
 
         void Delete(WarehouseBindingModel model);
+
+        void ReserveAutoparts(List<ServiceAutopartsBindingModel> autoparts);
+
+        void WriteOffAutoparts(List<ServiceAutopartsBindingModel> autoparts);
     }
 }

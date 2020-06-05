@@ -12,50 +12,28 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
 {
     public class ReportLogic
     {
-        private readonly IAutopartsLogic autopartsLogic;
         private readonly IServiceLogic serviceLogic;
         private readonly IOrderLogic orderLogic;
-        private readonly IUserLogic userLogic;
 
-        public ReportLogic(IServiceLogic serviceLogic, IAutopartsLogic autopartTypeLogic, IOrderLogic orderLogic, IUserLogic userLogic)
+        public ReportLogic(IServiceLogic serviceLogic, IOrderLogic orderLogic)
         {
             this.serviceLogic = serviceLogic;
-            this.autopartsLogic = autopartTypeLogic;
             this.orderLogic = orderLogic;
-            this.userLogic = userLogic;
         }
 
-        public Dictionary<int, List<ReportServiceViewModel>> GetServices(ReportBindingModel model)
+        public List<ReportServiceViewModel> GetServices(ReportBindingModel model)
         {
-            var orders = 
-                orderLogic
-                .Read(
-                    new OrderBindingModel
-                    {
-                        DateFrom = model.DateFrom,
-                        DateTo = model.DateTo
-                    }
-                );
+            var answer = new List<ReportServiceViewModel>();
 
-            Dictionary<int, List<ReportServiceViewModel>> answer = new Dictionary<int, List<ReportServiceViewModel>>();
-
-            foreach (var order in orders)
+            foreach (var orderId in model.OrdersId)
             {
-                var list = new List<ReportServiceViewModel>();
+                var order = orderLogic.Read(new OrderBindingModel { Id = orderId })[0];
 
-                foreach (var os in order.OrderServices)
+                answer.Add(new ReportServiceViewModel
                 {
-                    var record = new ReportServiceViewModel
-                    {
-                        OrderCreateDate = order.CreateDate,
-                        ServiceName = os.Value.Item1,
-                        Price = os.Value.Item2
-                    };
-
-                    list.Add(record);
-                }
-
-                answer.Add(order.Id, list);
+                    OrderId = orderId,
+                    Services = order.OrderServices.Select(rec => new ValueTuple<string, int>(rec.ServiceName, rec.Price)).ToList()
+                }) ;
             }
 
             return answer;
@@ -68,6 +46,7 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
                 .Read(
                     new OrderBindingModel
                     {
+                        UserId = model.UserId,
                         DateFrom = model.DateFrom,
                         DateTo = model.DateTo
                     }
@@ -79,60 +58,44 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
             {
                 foreach (var os in order.OrderServices)
                 {
-                    var service =
-                        serviceLogic
-                        .Read(
-                            new ServiceBindingModel
-                            {
-                                Id = os.Key
-                            }
-                        )?[0];
-
-                    foreach (var autoparts in service.ServiceAutoparts)
+                    list.AddRange (serviceLogic
+                    .Read(new ServiceBindingModel { Id = os.ServiceId } )?[0].ServiceAutoparts
+                    .Select (recSA => new ReportOrderAutopartsViewModel
                     {
-                        var record = new ReportOrderAutopartsViewModel
-                        {
-                            OrderCreateDate = order.CreateDate,
-                            AutopartsName = autoparts.Value.Item1,
-                            Count = autoparts.Value.Item2,
-                            Price = autoparts.Value.Item3
-                        };
-
-                        list.Add(record);
-                    }
+                        Id = order.Id,
+                        AutopartsName = recSA.Value.Item1,
+                        Count = recSA.Value.Item2,
+                        Price = recSA.Value.Item3 * recSA.Value.Item2
+                    }));
                 }
             }
 
             return list;
         }
 
-        public void SendServicesWordFile(UserBindingModel userModel, ReportBindingModel model)
+        public void SendServicesWordFile(ReportBindingModel model)
         {
             Random rnd = new Random();
             string fileName = ConfigurationManager.AppSettings["TempFilesPath"] + rnd.Next().ToString() + ".docx";
 
             SaveToWord.CreateDoc(new WordInfo
             {
-                FileName = model.FileName,
+                FileName = fileName,
                 Title = "Список работ",
-                Orders = GetServices(model)
+                Report = GetServices(model)
             });
-
-            UserViewModel user = userLogic.Read(userModel)?[0];
 
             MailLogic.MailSendAsync(
                 new MailSendInfo
                 {
-                    MailAddress = user.Email,
+                    MailAddress = model.UserEmail,
                     Subject = "Список Работ",
                     Text = "Отчёт в прикреплённом файле",
                     Attachment = fileName
                 });
-
-            File.Delete(fileName);
         }
 
-        public void SendServicesExcelFile(UserBindingModel userModel, ReportBindingModel model)
+        public void SendServicesExcelFile(ReportBindingModel model)
         {
             Random rnd = new Random();
             string fileName = ConfigurationManager.AppSettings["TempFilesPath"] + rnd.Next().ToString() + ".xlsx";
@@ -141,24 +104,20 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
             {
                 FileName = fileName,
                 Title = "Список работ",
-                Orders = GetServices(model)
+                Report = GetServices(model)
             });
-
-            UserViewModel user = userLogic.Read(userModel)?[0];
 
             MailLogic.MailSendAsync(
                 new MailSendInfo
                 {
-                    MailAddress = user.Email,
+                    MailAddress = model.UserEmail,
                     Subject = "Список работ",
                     Text = "Отчёт в прикреплённом файле",
                     Attachment = fileName
                 });
-
-            File.Delete(fileName);
         }
 
-        public void SendAutopartsPdfFile(UserBindingModel userModel, ReportBindingModel model)
+        public void SendAutopartsPdfFile(ReportBindingModel model)
         {
             Random rnd = new Random();
             string fileName = ConfigurationManager.AppSettings["TempFilesPath"] + rnd.Next().ToString() + ".pdf";
@@ -170,18 +129,14 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
                 OrderAutoparts = GetOrderAutoparts(model)
             });
 
-            UserViewModel user = userLogic.Read(userModel)?[0];
-
             MailLogic.MailSendAsync(
                 new MailSendInfo
                 {
-                    MailAddress = user.Email,
+                    MailAddress = model.UserEmail,
                     Subject = "Список заказов с расшифровкой по запчастям",
                     Text = "Отчёт в прикреплённом файле",
                     Attachment = fileName
                 });
-
-            File.Delete(fileName);
         }
     }
 }

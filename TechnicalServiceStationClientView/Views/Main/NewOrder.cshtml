@@ -1,0 +1,52 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Создать заказ</title>
+</head>
+<body>
+    <br />
+    <br />
+    <br />
+    <br />
+
+    <p align="right"><a href="/User/LogOut">Выйти</a></p>
+    <a href="/Main/Index">Назад</a>
+
+    <br />
+    <br />
+    <br />
+    <br />
+
+    <div align="center">
+        Список доступных работ
+        <br />
+        (можно выбрать несколько, если зажать ctrl)
+
+        <br />
+        <br />
+
+        <form method="get" action="/Main/CreateOrder">
+            <select multiple="multiple" name="services" size="20">
+                @foreach (var service in ViewBag.services)
+                {
+                    <option value="@service.Id">
+                        @service.Name (@service.Price)
+                    </option>
+                }
+            </select>
+
+            <br />
+            <br />
+
+            <input id="submit" type="submit" value="Создать заказ" />
+        </form>
+    </div>
+</body>
+</html>

@@ -51,7 +51,10 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
                         objMailMessage.Body = info.Text;
                         objMailMessage.SubjectEncoding = Encoding.UTF8;
                         objMailMessage.BodyEncoding = Encoding.UTF8;
-                        objMailMessage.Attachments.Add(new Attachment(info.Attachment));
+                        if (info.Attachment != null)
+                        {
+                            objMailMessage.Attachments.Add(new Attachment(info.Attachment));
+                        }
 
                         objSmtpClient.UseDefaultCredentials = false;
                         objSmtpClient.EnableSsl = true;

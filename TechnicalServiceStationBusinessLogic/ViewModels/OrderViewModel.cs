@@ -2,30 +2,32 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.Serialization;
-using TechnicalServiceStationBusinessLogic.Attributes;
 using TechnicalServiceStationBusinessLogic.Enums;
 
 namespace TechnicalServiceStationBusinessLogic.ViewModels
 {
-    public class OrderViewModel : ViewModel
+    public class OrderViewModel
     {
-        [Column(title: "Пользователь", gridViewAutoSize: GridViewAutoSize.Fill)]
+        [DataMember]
+        public int Id { get; set; }
+
+        [DisplayName("Пользователь")]
         [DataMember]
         public string UserEmail { get; set; }
 
-        [Column(title: "Цена", width: 50)]
+        [DisplayName("Цена")]
         [DataMember]
         public int Price { get; set; }
 
-        [Column(title: "Статус", width: 50)]
+        [DisplayName("Статус")]
         [DataMember]
         public OrderStatus Status { get; set; }
 
-        [Column(title: "Цена", width: 150)]
+        [DisplayName("Дата создания")]
         [DataMember]
         public DateTime CreateDate { get; set; }
 
-        [Column(title: "Цена", width: 150)]
+        [DisplayName("Дата выполнения")]
         [DataMember]
         public DateTime? DeliveryDate { get; set; }
 
@@ -33,17 +35,6 @@ namespace TechnicalServiceStationBusinessLogic.ViewModels
         public int UserId { get; set; }
 
         [DataMember]
-        public Dictionary<int, (string, int)> OrderServices { get; set; }
-
-        public override List<string> Properties()
-            => new List<string>
-            {
-                "Id",
-                "UserEmail",
-                "Price",
-                "Status",
-                "CreateDate",
-                "DeliveryDate"
-            };
+        public List<OrderServiceViewModel> OrderServices { get; set; }
     }
 }

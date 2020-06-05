@@ -1,0 +1,80 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Отчёт</title>
+</head>
+<body>
+    <br />
+    <br />
+    <br />
+    <br />
+
+    <p align="right"><a href="/User/LogOut">Выйти</a></p>
+    <a href="/Main/Index">Назад</a>
+
+    <br />
+    <br />
+    <br />
+    <br />
+
+    <div align="center">
+        <form method="get" action="/Main/GetReport">
+            <input type="date" name="dateFrom" value="@ViewBag.dateFrom" />
+            -
+            <input type="date" name="dateTo" value="@ViewBag.dateTo" />
+
+            <br />
+            <br />
+            <br />
+            <br />
+
+            <input name="actionOption" type="submit" value="Вывести отчёт по деталям" />
+
+            <br />
+            <br />
+
+            <input name="actionOption" type="submit" value="Отправить отчёт по деталям на почту (pdf)" />
+        </form>
+
+    </div>
+
+    <br />
+    <br />
+
+    <p align="center"><font color="#ff0000">@ViewData["errMessage"]</font></p>
+
+    <br />
+    <br />
+
+    <div align="center">
+        @if (ViewBag.reportList.Count > 0)
+        {
+            <table border="1">
+                <tr>
+                    <td>Id заказа</td>
+                    <td>Запчасти</td>
+                    <td>Количество</td>
+                    <td>Стоимость</td>
+                </tr>
+
+                @foreach (var report in ViewBag.reportList)
+                {
+                    <tr>
+                        <td>@report.Id</td>
+                        <td>@report.AutopartsName</td>
+                        <td>@report.Count шт</td>
+                        <td>@report.Price</td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
+</body>
+</html>

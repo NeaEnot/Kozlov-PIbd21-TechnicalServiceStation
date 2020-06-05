@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,24 +21,34 @@ namespace TechnicalServiceStationClientView.Controllers
         }
 
         [HttpGet]
-        public ActionResult LogIn(string Email, string Password)
+        public ActionResult LogIn(string email, string password)
         {
             try
             {
-                UserViewModel user = logic.Read(new UserBindingModel { Email = Email, Password = Password })?[0];
+                UserViewModel user = logic.Read(new UserBindingModel { Email = email, Password = password })?[0];
+                HttpContext.Session.SetInt32("userId", user.Id);
+                HttpContext.Session.SetString("userEmail", user.Email);
             }
             catch
             {
                 return Redirect("/User/Enter?errMessage=Неправильная почта или пароль");
             }
 
-            return Redirect("/User/Enter/#");
+            return Redirect("/Main/Index/");
+        }
+
+        public ActionResult LogOut()
+        {
+            HttpContext.Session.Remove("userId");
+            HttpContext.Session.Remove("userEmail");
+
+            return Redirect("/User/Enter");
         }
 
         [HttpPost]
-        public ActionResult RegisterOrUpdateData(string Email, string Password)
+        public ActionResult RegisterOrUpdateData(string email, string password)
         {
-            UserBindingModel model = new UserBindingModel { Email = Email, Password = Password };
+            UserBindingModel model = new UserBindingModel { Email = email, Password = password };
 
             try
             {

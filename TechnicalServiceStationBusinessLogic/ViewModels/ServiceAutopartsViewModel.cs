@@ -1,17 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System.ComponentModel;
 using System.Runtime.Serialization;
-using TechnicalServiceStationBusinessLogic.Attributes;
-using TechnicalServiceStationBusinessLogic.Enums;
 
 namespace TechnicalServiceStationBusinessLogic.ViewModels
 {
-    public class ServiceAutopartsViewModel : ViewModel
+    public class ServiceAutopartsViewModel
     {
-        [Column(title: "Запчасти", gridViewAutoSize: GridViewAutoSize.Fill)]
         [DataMember]
-        public string AutopartTypeName { get; set; }
+        public int Id { get; set; }
 
-        [Column(title: "Количество", width: 100)]
+        [DisplayName("Запчасти")]
+        [DataMember]
+        public string AutopartsName { get; set; }
+
+        [DisplayName("Количество")]
         [DataMember]
         public int Count { get; set; }
 
@@ -19,14 +20,6 @@ namespace TechnicalServiceStationBusinessLogic.ViewModels
         public int ServiceId { get; set; }
 
         [DataMember]
-        public int AutopartTypeId { get; set; }
-
-        public override List<string> Properties()
-            => new List<string>
-            {
-                "Id",
-                "AutopartTypeName",
-                "Count"
-            };
+        public int AutopartsId { get; set; }
     }
 }

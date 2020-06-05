@@ -26,113 +26,301 @@ namespace TechnicalServiceStationClientView.Controllers
         }
 
         [HttpGet]
-        public List<ServiceViewModel> GetServices(ServiceBindingModel model) => service.Read(model)?.ToList();
+        public ActionResult CreateOrder(string[] services)
+        {
+            if (services.Length == 0)
+            {
+                return Redirect("/Main/Index?errMessage=" + "Для формирования заказа нужно выбрать по крайней мере одну работу");
+            }
 
+            string errMessage = "";
+
+            List<ServiceViewModel> servicesList = null;
+
+            try
+            {
+                servicesList = service.Read(null)?.Where(rec => services.Contains(rec.Id.ToString())).ToList();
+            }
+            catch (Exception e)
+            {
+                errMessage += e.Message + "\n";
+            }
+
+            try
+            {
+                main.CreateOrder(
+                new OrderBindingModel
+                {
+                    UserId = getUserId(),
+                    CreateDate = DateTime.Now.Date,
+                    Price = servicesList.Sum(rec => rec.Price),
+                    OrderServices = servicesList.ToDictionary(rec => rec.Id, rec => rec.Name)
+                });
+            }
+            catch (Exception e)
+            {
+                errMessage += e.Message + "\n";
+            }
+
+            return Redirect("/Main/Index?errMessage=" + errMessage);
+        }
+
+        // GET: Main/Index
         [HttpGet]
-        public List<OrderViewModel> GetOrders(int userId)
-            => order.Read(new OrderBindingModel { UserId = userId });
+        public ActionResult Index(string errMessage)
+        {
+            if (!HttpContext.Session.Keys.Contains("userId"))
+            {
+                return Redirect("/User/Enter");
+            }
 
-        [HttpPost]
-        public void CreateOrder(OrderBindingModel model)
-            => main.CreateOrder(model);
+            try
+            {
+                ViewBag.orders = order.Read(new OrderBindingModel { UserId = getUserId() });
+            }
+            catch (Exception e)
+            {
+                errMessage += "\n" + e.Message;
+                ViewBag.orders = null;
+            }
 
+            ViewBag.errMessage = errMessage;
+
+            return View();
+        }
+
+        // GET: Main/NewOrder
         [HttpGet]
-        public List<ReportOrderAutopartsViewModel> GetReportOrderAutoparts(DateTime dateFrom, DateTime dateTo)
-            => report.GetOrderAutoparts(new ReportBindingModel { DateFrom = dateFrom, DateTo = dateTo })?.ToList();
-
-        [HttpPost]
-        public void SendReportPdf(int userId, DateTime dateFrom, DateTime dateTo)
-            => report.SendAutopartsPdfFile(new UserBindingModel { Id = userId }, new ReportBindingModel { DateFrom = dateFrom, DateTo = dateTo });
-
-        [HttpPost]
-        public void SendReportWord(int userId, DateTime dateFrom, DateTime dateTo)
-            => report.SendServicesWordFile(new UserBindingModel { Id = userId }, new ReportBindingModel { DateFrom = dateFrom, DateTo = dateTo });
-
-        [HttpPost]
-        public void SendReportExcel(int userId, DateTime dateFrom, DateTime dateTo)
-            => report.SendServicesExcelFile(new UserBindingModel { Id = userId }, new ReportBindingModel { DateFrom = dateFrom, DateTo = dateTo });
-
-        // --------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        // GET: Main
-        public ActionResult Index()
+        public ActionResult NewOrder()
         {
+            if (!HttpContext.Session.Keys.Contains("userId"))
+            {
+                return Redirect("/User/Enter");
+            }
+
+            ViewBag.services = service.Read(null)?.ToList();
+
             return View();
         }
 
-        // GET: Main/Details/5
-        public ActionResult Details(int id)
+        // GET: Main/Orders
+        [HttpGet]
+        public ActionResult Orders(string[] orders, string actionOption, string format)
         {
+            if (!HttpContext.Session.Keys.Contains("userId"))
+            {
+                return Redirect("/User/Enter");
+            }
+
+            if (orders.Length == 0)
+            {
+                return Redirect("/Main/Index?errMessage=Выберите хотя бы один заказ");
+            }
+
+            string errMessage = "";
+
+            if (actionOption == "Зарезервировать детали")
+            {
+                foreach (var orderId in orders)
+                {
+                    try
+                    {
+                        main.ReserveAutoparts(new OrderBindingModel { Id = int.Parse(orderId) });
+                    }
+                    catch (Exception e)
+                    {
+                        errMessage += orderId + " : " + e.Message + "\n";
+                    }
+                }
+            }
+
+            if (actionOption == "Отправить отчёт о работах на почту")
+            {
+                try
+                {
+                    List<int> ordersId = new List<int>();
+
+                    foreach (var orderId in orders)
+                    {
+                        ordersId.Add(int.Parse(orderId));
+                    }
+
+                    if (format == "docx")
+                    {
+                        report.SendServicesWordFile(new ReportBindingModel
+                        {
+                            UserId = getUserId(),
+                            UserEmail = getUserEmail(),
+                            OrdersId = ordersId
+                        });
+                    }
+
+                    if (format == "xmlx")
+                    {
+                        report.SendServicesExcelFile(new ReportBindingModel
+                        {
+                            UserId = getUserId(),
+                            UserEmail = getUserEmail(),
+                            OrdersId = ordersId
+                        });
+                    }
+                }
+                catch (Exception e)
+                {
+                    errMessage = e.Message;
+                }
+            }
+
+            return Redirect("/Main/Index?errMessage=" + errMessage);
+        }
+
+        // GET: Main/Report
+        [HttpGet]
+        public ActionResult Report(string report, string errMessage, string dateFrom = "00.00.0000", string dateTo = "00.00.0000")
+        {
+            if (!HttpContext.Session.Keys.Contains("userId"))
+            {
+                return Redirect("/User/Enter");
+            }
+
+            List<ReportOrderAutopartsViewModel> reportList = new List<ReportOrderAutopartsViewModel>();
+            if (report != null)
+            {
+                foreach (var r in report.Split(';'))
+                {
+                    reportList.Add(new ReportOrderAutopartsViewModel
+                    {
+                        Id = int.Parse(r.Split(',')[0]),
+                        AutopartsName = r.Split(',')[1],
+                        Count = int.Parse(r.Split(',')[2]),
+                        Price = int.Parse(r.Split(',')[3])
+                    });
+                }
+            }
+
+            ViewBag.reportList = reportList;
+            ViewBag.errMessage = errMessage;
+            ViewBag.dateFrom = dateFrom;
+            ViewBag.dateTo = dateTo;
+
             return View();
         }
 
-        // GET: Main/Create
-        public ActionResult Create()
+        // GET: Main/GetReport
+        [HttpGet]
+        public ActionResult GetReport(string dateFrom, string dateTo, string actionOption)
         {
-            return View();
-        }
+            if (!HttpContext.Session.Keys.Contains("userId"))
+            {
+                return Redirect("/User/Enter");
+            }
 
-        // POST: Main/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
+            DateTime from;
+            DateTime to;
+
             try
             {
-                // TODO: Add insert logic here
-
-                return RedirectToAction(nameof(Index));
+                from = DateTime.Parse(dateFrom);
+                to = DateTime.Parse(dateTo);
             }
             catch
             {
-                return View();
+                return Redirect("/Main/Report?" +
+                                "errMessage=Введите значения для даты начала и даты окочания периода" +
+                                "&dateFrom=" + (dateFrom == null ? "00.00.0000" : dateFrom) + 
+                                "&dateTo=" + (dateTo == null ? "00.00.0000" : dateTo));
             }
+
+            if (from >= to)
+            {
+                return Redirect("/Main/Report?" +
+                                "errMessage=Дата окончания периода должна быть больше даты начала" +
+                                "&dateFrom=" + dateFrom +
+                                "&dateTo=" + dateTo);
+            }
+
+            if (actionOption == "Вывести отчёт по деталям")
+            {
+                string reportMessage = "";
+                string errMessage = "";
+
+                try
+                {
+                    List<ReportOrderAutopartsViewModel> reportList = report.GetOrderAutoparts(new ReportBindingModel 
+                    { 
+                        UserId = getUserId(), 
+                        UserEmail = getUserEmail(), 
+                        DateFrom = from, 
+                        DateTo = to 
+                    })?.ToList();
+
+                    foreach (var report in reportList)
+                    {
+                        reportMessage += report.Id + "," + report.AutopartsName + "," + report.Count + "," + report.Price + ";";
+                    }
+                    reportMessage = reportMessage.Substring(0, reportMessage.Length - 1);
+                }
+                catch (Exception e)
+                {
+                    errMessage = e.Message;
+                }
+
+                return Redirect("/Main/Report?" +
+                                "report=" + reportMessage + 
+                                "&errMessage=" + errMessage +
+                                "&dateFrom=" + dateFrom +
+                                "&dateTo=" + dateTo);
+            }
+
+            if (actionOption == "Отправить отчёт по деталям на почту (pdf)")
+            {
+                string errMessage = "";
+
+                try
+                {
+                    report.SendAutopartsPdfFile(new ReportBindingModel 
+                    {
+                        UserId = getUserId(), 
+                        UserEmail = getUserEmail(), 
+                        DateFrom = from, 
+                        DateTo = to 
+                    });
+                }
+                catch (Exception e)
+                {
+                    errMessage = e.Message;
+                }
+
+                return Redirect("/Main/Index?errMessage=" + errMessage);
+            }
+
+            return Redirect("/Main/Index");
         }
 
-        // GET: Main/Edit/5
-        public ActionResult Edit(int id)
+        public int getUserId()
         {
-            return View();
+            var bytes = HttpContext.Session.Get("userId");
+            int userId = 0;
+
+            for (int i = bytes.Length - 1; i >= 0; i--)
+            {
+                userId += bytes[i] * Convert.ToInt32((Math.Pow(byte.MaxValue, bytes.Length - 1 - i)));
+            }
+
+            return userId;
         }
 
-        // POST: Main/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public string getUserEmail()
         {
-            try
-            {
-                // TODO: Add update logic here
+            var bytes = HttpContext.Session.Get("userEmail");
+            string answer = "";
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch
+            for (int i = 0; i < bytes.Length; i++)
             {
-                return View();
+                answer += (char)bytes[i];
             }
-        }
 
-        // GET: Main/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: Main/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                // TODO: Add delete logic here
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            return answer;
         }
     }
 }

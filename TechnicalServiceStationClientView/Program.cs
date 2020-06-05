@@ -1,10 +1,9 @@
-using TechnicalServiceStationBusinessLogic.ViewModels;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
 namespace TechnicalServiceStationClientView
 {
-    static class Program
+    public class Program
     {
         public static void Main(string[] args)
         {

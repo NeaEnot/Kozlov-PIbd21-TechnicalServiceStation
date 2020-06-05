@@ -20,7 +20,7 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
             paragraph.Style = "NormalTitle";
 
             var table = document.LastSection.AddTable();
-            List<string> columns = new List<string> { "5cm", "6cm", "3cm", "3cm" };
+            List<string> columns = new List<string> { "3cm", "6cm", "4cm", "4cm" };
 
             foreach (var elem in columns)
             {
@@ -30,7 +30,7 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
             CreateRow(new PdfRowParameters
             {
                 Table = table,
-                Texts = new List<string> { "Дата заказа", "Запчасти", "Количество", "Сумма" },
+                Texts = new List<string> { "Id заказа", "Запчасти", "Количество", "Сумма" },
                 Style = "NormalTitle",
                 ParagraphAlignment = ParagraphAlignment.Center
             });
@@ -42,7 +42,7 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
                     Table = table,
                     Texts = new List<string>
                     {
-                        oa.OrderCreateDate.ToString("dd.MM.yyyy"),
+                        oa.Id.ToString(),
                         oa.AutopartsName,
                         oa.Count.ToString(),
                         oa.Price.ToString()

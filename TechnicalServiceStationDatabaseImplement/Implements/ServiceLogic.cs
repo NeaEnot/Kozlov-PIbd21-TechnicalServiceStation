@@ -134,7 +134,7 @@ namespace TechnicalServiceStationDatabaseImplement.Implements
                         context.ServiceAutoparts
                         .Include(recSA => recSA.Autoparts)
                         .Where(recSA => recSA.ServiceId == rec.Id)
-                        .ToDictionary(recSA => recSA.AutopartsId, recSA => (recSA.Autoparts?.Name, recSA.Count, recSA.Autoparts.Price * recSA.Count))
+                        .ToDictionary(recSA => recSA.AutopartsId, recSA => (recSA.Autoparts?.Name, recSA.Count, recSA.Autoparts.Price))
                 })
                 .ToList();
             }

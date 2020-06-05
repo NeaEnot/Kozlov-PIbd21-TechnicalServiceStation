@@ -27,13 +27,13 @@ namespace TechnicalServiceStationBusinessLogic.BusinessLogic
                     }
                 }));
 
-                foreach (var order in info.Orders)
+                foreach (var order in info.Report)
                 {
-                    foreach (var service in order.Value)
+                    foreach (var service in order.Services)
                     {
                         docBody.AppendChild(CreateParagraph(new WordParagraph
                         {
-                            Texts = new List<string> { service.OrderCreateDate.ToString("dd.MM.yyyy"), " - ", service.ServiceName, " (" + service.Price.ToString() + ")" },
+                            Texts = new List<string> { order.OrderId.ToString(), " - ", service.Item1, " (" + service.Item2.ToString() + ")" },
                             TextProperties = new WordParagraphProperties
                             {
                                 Bold = false,
