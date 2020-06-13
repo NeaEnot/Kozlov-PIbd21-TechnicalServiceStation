@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TechnicalServiceStationBusinessLogic.BindingModels;
 using TechnicalServiceStationBusinessLogic.BusinessLogic;
+using TechnicalServiceStationBusinessLogic.Enums;
 using TechnicalServiceStationBusinessLogic.Interfaces;
 using TechnicalServiceStationBusinessLogic.ViewModels;
 
@@ -16,13 +17,15 @@ namespace TechnicalServiceStationClientView.Controllers
         private readonly IServiceLogic service;
         private readonly MainLogic main;
         private readonly ReportLogic report;
+        private readonly BackUpAbstractLogic backUp;
 
-        public MainController(IOrderLogic order, IServiceLogic service, MainLogic main, ReportLogic report)
+        public MainController(IOrderLogic order, IServiceLogic service, MainLogic main, ReportLogic report, BackUpAbstractLogic backUp)
         {
             this.order = order;
             this.service = service;
             this.main = main;
             this.report = report;
+            this.backUp = backUp;
         }
 
         [HttpGet]
@@ -155,7 +158,7 @@ namespace TechnicalServiceStationClientView.Controllers
                         });
                     }
 
-                    if (format == "xmlx")
+                    if (format == "xlsx")
                     {
                         report.SendServicesExcelFile(new ReportBindingModel
                         {
@@ -295,6 +298,35 @@ namespace TechnicalServiceStationClientView.Controllers
             }
 
             return Redirect("/Main/Index");
+        }
+
+        // GET: Main/GetReport
+        [HttpGet]
+        public ActionResult GetBackUp(string format)
+        {
+            string errMessage = "";
+
+            try
+            {
+                BackUpFormat f = BackUpFormat.json;
+                switch (format)
+                {
+                    case "json":
+                        f = BackUpFormat.json;
+                        break;
+                    case "xml":
+                        f = BackUpFormat.xml;
+                        break;
+                }
+
+                backUp.SendArchive(new UserBindingModel { Id = getUserId(), Email = getUserEmail() }, f);
+            }
+            catch (Exception e)
+            {
+                errMessage = e.Message;
+            }
+
+            return Redirect("/Main/Index?errMessage=" + errMessage);
         }
 
         public int getUserId()

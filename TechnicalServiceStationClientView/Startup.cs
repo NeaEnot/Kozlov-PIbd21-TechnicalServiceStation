@@ -42,6 +42,7 @@ namespace TechnicalServiceStationClientView
             services.AddTransient<IServiceLogic, ServiceLogic>();
             services.AddTransient<IAutopartsLogic, AutopartsLogic>();
             services.AddTransient<IWarehouseLogic, WarehouseLogic>();
+            services.AddTransient<BackUpAbstractLogic, BackUpLogic>();
             services.AddTransient<MainLogic>();
             services.AddTransient<ReportLogic>();
 

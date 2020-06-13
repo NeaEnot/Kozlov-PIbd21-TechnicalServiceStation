@@ -163,6 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Implements\AutopartsLogic.cs" />
+    <Compile Include="Implements\BackUpLogic.cs" />
     <Compile Include="Implements\OrderLogic.cs" />
     <Compile Include="Implements\ServiceLogic.cs" />
     <Compile Include="Implements\UserLogic.cs" />

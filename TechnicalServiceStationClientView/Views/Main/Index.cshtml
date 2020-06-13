@@ -45,7 +45,7 @@
 
             <input type="radio" name="format" value="docx" checked="checked" /> docx
             &nbsp&nbsp&nbsp
-            <input type="radio" name="format" value="xmlx" /> xmlx
+            <input type="radio" name="format" value="xlsx" /> xlsx
 
             <br />
 
@@ -66,6 +66,18 @@
         &nbsp&nbsp&nbsp&nbsp&nbsp
         <a href="/Main/Report?reportList=null">Отчёт</a>
     </p>
+
+    <div align="right">
+        <form method="get" action="/Main/GetBackUp">
+            <input type="radio" name="format" value="json" checked="checked" /> json
+            &nbsp&nbsp&nbsp
+            <input type="radio" name="format" value="xml" /> xml
+
+            <br />
+
+            <input type="submit" name="actionOption" value="Отправить резервную копию почту" />
+        </form>
+    </div>
 
 </body>
 </html>
